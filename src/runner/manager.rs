@@ -17,7 +17,7 @@ unsafe impl std::marker::Send for RunnerInfo{}
 struct DefaultRunnerManager{
     info:Arc<RunnerInfo>,
     r:Arc<dyn repository::Repository>,
-    sender:mpsc::Sender<i32>,
+    sender:Mutex<mpsc::Sender<i32>>,
     receiver:Arc<Mutex<mpsc::Receiver<i32>>>,
 }
 
@@ -34,20 +34,20 @@ fn new(core_num:i32,
     return DefaultRunnerManager{
         info:Arc::new(info),
         r:r.clone(),
-        sender:tx,
+        sender:Mutex::new(tx),
         receiver:Arc::new(Mutex::new(rx)),
     }
 }
 impl RunnerManager for DefaultRunnerManager {
     fn refresh(&self){
-        let sender=self.sender.clone();
+        let sender=self.sender.lock().unwrap().clone();
         let _ = sender.send(0);
     }
     fn start(&self){
         let rec =self.receiver.clone();
         let r=self.r.clone();
         let info = self.info.clone();
-        let sender=self.sender.clone();
+        let sender=self.sender.lock().unwrap().clone();
         thread::spawn(move || {
             loop{
                 let id = match rec.lock().unwrap().recv(){

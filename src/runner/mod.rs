@@ -1,6 +1,6 @@
 
 
-pub trait RunnerManager {
+pub trait RunnerManager:std::marker::Send +std::marker::Send+std::marker::Sync {
     fn refresh(&self);
     fn start(&self);
 }
