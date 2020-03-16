@@ -243,29 +243,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lab_tool"
-version = "0.1.0"
-dependencies = [
- "cc",
- "clap",
- "futures",
- "glob",
- "lazy_static",
- "libc",
- "mustache",
- "num",
- "num-derive",
- "num-traits",
- "num_cpus",
- "rusqlite",
- "serde",
- "serde_json",
- "serde_yaml",
- "time",
- "tokio",
-]
-
-[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -507,6 +484,29 @@ checksum = "46203554f085ff89c235cd12f7075f3233af9b11ed7c9e16dfe2560d03313ce6"
 dependencies = [
  "hermit-abi",
  "libc",
+]
+
+[[package]]
+name = "osier-server"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "clap",
+ "futures",
+ "glob",
+ "lazy_static",
+ "libc",
+ "mustache",
+ "num",
+ "num-derive",
+ "num-traits",
+ "num_cpus",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "time",
+ "tokio",
 ]
 
 [[package]]

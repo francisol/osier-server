@@ -1,5 +1,5 @@
 [package]
-name = "lab_tool"
+name = "osier-server"
 version = "0.1.0"
 authors = ["xie_zhongtao <xie_zhongtao@163.com>"]
 edition = "2018"

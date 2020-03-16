@@ -1,5 +1,5 @@
-lab_tool
+osier
 
-lab tool developped by rust depended on lua and SQLite
+tiny  tool developped by rust depended on lua and SQLite
 
 status: developing

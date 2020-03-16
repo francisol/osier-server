@@ -21,9 +21,9 @@ fn init_config() -> Arc<AppConfig> {
     if cfg!(lunix) {
         def_base_dir = String::from_str("/var/lab_tool").unwrap();
     }
-    let matches = App::new("lab_tool")
+    let matches = App::new("osier-server")
         .version("dev-1")
-        .about("lab tool developped by rust depended on lua and SQLite")
+        .about("tiny tool developped by rust depended on lua and SQLite")
         .author("Xie Zhongtao")
         .arg(
             Arg::with_name("core_num")
