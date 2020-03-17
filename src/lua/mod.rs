@@ -8,35 +8,46 @@ pub type size_t = c_ulong;
 
 pub type lua_KFunction = c_void;
 pub type lua_KContext = isize;
+pub const LUA_TNIL:i32 =0;
+pub const LUA_TBOOLEAN:i32 =1;
+pub const LUA_TLIGHTUSERDATA:i32 =	2;
+pub const LUA_TNUMBER:i32 =3;
+pub const LUA_TSTRING:i32 =4;
+pub const LUA_TTABLE:i32 =5;
+pub const LUA_TFUNCTION:i32 =6;
+pub const LUA_TUSERDATA:i32 =7;
+pub const LUA_TTHREAD:i32 =8;
 
+pub const LUA_NUMTAGS:i32 =9;
 extern "C" {
     pub fn luaL_openlibs(L: *mut lua_State);
+    pub fn luaL_openExtendlibs(L: *mut lua_State);
     pub fn lua_close(L: *mut lua_State);
     pub fn luaL_newstate() -> *mut lua_State;
-    pub fn lua_version(L: *mut lua_State) -> *const f64;
-    fn lua_getfield(L: *mut lua_State, idx: c_int, k: *const c_char) -> c_int;
+    pub fn lua_version(L: *mut lua_State) -> * const f64;
+    fn lua_getfield(L: *mut lua_State, idx: c_int, k: * const c_char) -> c_int;
     pub fn lua_toboolean(L: *mut lua_State, idx: c_int) -> c_int;
-    pub fn lua_tolstring(L: *mut lua_State, idx: c_int, len: *mut size_t) -> *const c_char;
+    pub fn lua_tolstring(L: *mut lua_State, idx: c_int, len: *mut size_t) -> * const c_char;
     pub fn lua_getglobal(
         L: *mut lua_State,
-        name: *const c_char,
+        name: * const c_char,
     ) -> c_int;
     pub fn lua_settop(L: *mut lua_State, idx: c_int);
     pub fn lua_pushstring(
         L: *mut lua_State,
-        s: *const c_char,
-    ) -> *const c_char;
+        s: * const c_char,
+    ) -> * const c_char;
     pub fn lua_setfield(
         L: *mut lua_State,
         idx: c_int,
-        k: *const c_char,
+        k: * const c_char,
     );
     pub fn luaL_loadfilex(
         L: *mut lua_State,
-        filename: *const c_char,
-        mode: *const c_char,
+        filename: * const c_char,
+        mode: * const c_char,
     ) -> c_int;
-    pub fn lua_setglobal(L: *mut lua_State, name: *const c_char);
+    pub fn lua_setglobal(L: *mut lua_State, name: * const c_char);
     pub fn lua_pcallk(
         L: *mut lua_State,
         nargs: c_int,

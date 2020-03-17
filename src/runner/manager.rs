@@ -81,7 +81,11 @@ impl RunnerManager for DefaultRunnerManager {
                     sender.clone(),
                 ){
                     Ok(t)=>t,
-                    Err(e)=>{error!("{:?}",e);continue;}
+                    Err(e)=>{
+                        error!("{:?}",e);
+                        let _= r.do_error(task.id,&format!("{:?}",e));
+                        continue;
+                    }
                 };
                 cache.insert(task.id, task.core_num);
                 t.run();

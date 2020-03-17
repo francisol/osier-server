@@ -10,6 +10,7 @@ pub enum Error {
     SQLite(rusqlite::Error),
     JSON(serde_json::Error),
     Normal(String),
+    Utf8Error(std::str::Utf8Error),
     OK,
 }
 impl Serialize for Error {
@@ -21,6 +22,8 @@ impl Serialize for Error {
         return serializer.serialize_str(&data);
     }
 }
+
+
 
 impl<'de> Deserialize<'de> for Error {
   
@@ -42,7 +45,12 @@ impl std::convert::From<serde_yaml::Error> for Error {
         Error::Yaml(e)
     }
 }
-
+impl std::convert::From<std::str::Utf8Error> for Error{
+    
+fn from(e: std::str::Utf8Error) -> Self { 
+    Error::Utf8Error(e)
+ }
+}
 impl std::convert::From<serde_json::Error> for Error {
     fn from(_data: serde_json::Error) -> Self {
         Error::JSON(_data)

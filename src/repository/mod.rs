@@ -8,6 +8,7 @@ pub enum TaskStatus {
     Wait,
     Doing,
     Done,
+    Error,
 }
 
 impl rusqlite::types::ToSql for TaskStatus {
@@ -41,6 +42,7 @@ pub struct Task {
 pub trait Repository: std::marker::Sync + std::marker::Send {
     fn save(&self, task: &Task) -> Result<bool>;
     fn clear(&self)->Result<bool>;
+    fn do_error(&self,id:i32,msg:&String)->Result<usize>;
     fn get_wait_tasks(&self) -> Result<Vec<Task>>;
     fn get_wait_task(&self) -> Result<Task>;
     fn doing(&self, id: i32) -> Result<bool>;

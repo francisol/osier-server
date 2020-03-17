@@ -61,7 +61,7 @@ impl repository::Repository for SQLliteRepository {
     fn clear(&self)->Result<bool>{
         let conn = &self.conn.lock().unwrap();
         conn.execute(
-            "UPDATE tasks set status = 0 where status= 1",
+            "UPDATE tasks set status = 0",
             params![])?;
         return Ok(true);
     }
@@ -83,7 +83,14 @@ impl repository::Repository for SQLliteRepository {
         });
         return task;
     }
-
+    fn do_error(&self,id:i32,msg:&String)->Result<usize>{
+        let conn = &self.conn.lock().unwrap();
+        let t =time::get_time();
+        conn.execute(
+            "UPDATE tasks set status = ?1,finished_at=?2,msg=?3 where id= ?4",
+            params![TaskStatus::Error, t,msg, id],
+        )
+    }
     fn get_wait_tasks(&self) -> Result<Vec<repository::Task>> {
         let mut resut = Vec::<repository::Task>::new();
         let conn = &self.conn.lock().unwrap();

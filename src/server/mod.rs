@@ -47,7 +47,7 @@ impl TCPServer {
                         Ok(n) if n == 0 => return,
                         Ok(n) => n,
                         Err(e) => {
-                            eprintln!("failed to read from socket; err = {:?}", e);
+                            error!("failed to read from socket; err = {:?}", e);
                             return;
                         }
                     };

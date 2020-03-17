@@ -24,7 +24,7 @@ use env_logger::{Builder, Target};
 fn main() {
     env_logger::init();
     std::panic::set_hook(Box::new(|panic_info|{
-        error!("panic info: {:?},panic occurred in {:?}",panic_info.payload().downcast_ref::<&str>().unwrap(),panic_info.location().unwrap());
+        error!("panic info: {:?}",panic_info);
     }));
     let c = config::get_config();
     std::env::set_current_dir(&c.base_dir).expect("set_current_dir fail");
