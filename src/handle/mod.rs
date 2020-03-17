@@ -26,6 +26,27 @@ struct CreateCMD {
     pub base_dir: String,
     pub core_num: i32,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+struct QueryListCMD {
+    pub from: i32,
+    pub to: i32,
+}
+#[derive(Serialize, Deserialize, Debug)]
+struct RemoveCMD {
+    pub id: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct RestartCMD {
+    pub id: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ContinueCMD {
+    pub id: i32,
+}
+
 impl CMDHandler for CreateCMD {
     fn handle(&self, handler: &JSONHandler) -> Result<HanderResult> {
         let r = handler.r.clone();
@@ -49,6 +70,12 @@ impl CMDHandler for CreateCMD {
         }
     }
 }
+impl CMDHandler for QueryListCMD {
+    
+fn handle(&self, handle:&JSONHandler) -> Result<HanderResult> { 
+    unimplemented!() }
+}
+
 pub struct JSONHandler {
     pub r: Arc<dyn repository::Repository>,
     pub rm: Arc<dyn RunnerManager>,
@@ -62,6 +89,7 @@ impl Handler for JSONHandler {
     fn handle(&self, name: &str, data: &[u8]) -> Result<HanderResult> {
         return match name {
             "create" => {
+                debug!("create {}",std::str::from_utf8(data).unwrap());
                 let cmd: CreateCMD = serde_json::from_slice(data)?;
                 return self._handle(&cmd);
             }

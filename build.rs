@@ -11,6 +11,7 @@ fn main() {
     }
     build
         .file("lfs/lfs.c")
+        .file("path/path.c")
         .file("lua_extend.c")
         .opt_level(3)
         .include(include_dir)

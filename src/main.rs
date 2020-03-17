@@ -20,13 +20,12 @@ extern crate lazy_static;
 extern crate log;
 extern crate env_logger;
 
-use env_logger::{Builder, Target};
 fn main() {
-    env_logger::init();
     std::panic::set_hook(Box::new(|panic_info|{
         error!("panic info: {:?}",panic_info);
     }));
     let c = config::get_config();
+    simple_logging::log_to_file(format!("{}/info.log",&c.base_dir), log::LevelFilter::Info).unwrap();
     std::env::set_current_dir(&c.base_dir).expect("set_current_dir fail");
     let db =format!("{}/db",&c.base_dir);
     let repo= repository::sqlite::SQLliteRepository::new(&db);

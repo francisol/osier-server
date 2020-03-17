@@ -35,6 +35,7 @@ impl TCPServer {
     #[tokio::main]
     async fn _start(&self, port: i16) -> Result<(), Box<dyn std::error::Error>> {
         let mut listener = TcpListener::bind(format!("127.0.0.1:{}", port)).await?;
+        info!("Servr start on {}",port);
         loop {
             let (mut socket, _) = listener.accept().await?;
             let h = self.h.clone();

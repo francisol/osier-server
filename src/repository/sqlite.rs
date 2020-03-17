@@ -61,7 +61,7 @@ impl repository::Repository for SQLliteRepository {
     fn clear(&self)->Result<bool>{
         let conn = &self.conn.lock().unwrap();
         conn.execute(
-            "UPDATE tasks set status = 0",
+            "UPDATE tasks set status = 0 where status= 1",
             params![])?;
         return Ok(true);
     }
