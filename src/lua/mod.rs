@@ -36,7 +36,7 @@ extern "C" {
         filename: *const c_char,
         mode: *const c_char,
     ) -> c_int;
-
+    pub fn lua_setglobal(L: *mut lua_State, name: *const c_char);
     pub fn lua_pcallk(
         L: *mut lua_State,
         nargs: c_int,

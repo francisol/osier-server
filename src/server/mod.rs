@@ -58,7 +58,7 @@ impl TCPServer {
                     let name = match std::str::from_utf8(&buf[0..index]) {
                         Ok(name) => name,
                         Err(err) => {
-                            println!("Err: {}", err);
+                            error!("Err: {}", err);
                             return;
                         }
                     };

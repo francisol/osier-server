@@ -3,9 +3,22 @@ use crate::repository::TaskStatus;
 use rusqlite::{params, Connection, Result};
 use std::sync::{Arc, Mutex};
 use time::Timespec;
-struct SQLliteRepository {
+pub struct SQLliteRepository {
     conn: Mutex<rusqlite::Connection>,
 }
+
+const CREATE_TABLE: &'static str=r#"
+CREATE TABLE IF NOT EXISTS "tasks" (
+	"id"	INTEGER PRIMARY KEY AUTOINCREMENT,
+	"task_name"	TEXT UNIQUE,
+	"priority"	INTEGER DEFAULT 0,
+	"core_num"	INTEGER DEFAULT 1,
+	"base_dir"	TEXT,
+	"status"	INTEGER,
+	"created_at"	TEXT,
+	"finished_at"	TEXT,
+	"msg"	TEXT
+)"#;
 
 impl SQLliteRepository {
     pub fn new(path: &String) -> SQLliteRepository {
@@ -16,6 +29,7 @@ impl SQLliteRepository {
                 std::process::exit(-1);
             }
         };
+        conn.execute(CREATE_TABLE,params![]).unwrap();
         SQLliteRepository {
             conn: Mutex::new(conn),
         }
@@ -44,9 +58,17 @@ impl repository::Repository for SQLliteRepository {
              Err(e)=>Err(e),
          };
     }
+    fn clear(&self)->Result<bool>{
+        let conn = &self.conn.lock().unwrap();
+        conn.execute(
+            "UPDATE tasks set status = 0 where status= 1",
+            params![])?;
+        return Ok(true);
+    }
     fn get_wait_task(&self) -> Result<repository::Task> {
         let conn = &self.conn.lock().unwrap();
-        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at FROM tasks where status==1 limit 1")?;
+        debug!("Query");
+        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at FROM tasks where status==0 limit 1")?;
         let task = stmt.query_row(params![], |row| {
             return Ok(repository::Task {
                 id: row.get(0)?,
@@ -65,7 +87,7 @@ impl repository::Repository for SQLliteRepository {
     fn get_wait_tasks(&self) -> Result<Vec<repository::Task>> {
         let mut resut = Vec::<repository::Task>::new();
         let conn = &self.conn.lock().unwrap();
-        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at FROM tasks where status==1")?;
+        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at FROM tasks where status==0")?;
         let _tasks = stmt.query_map(params![], |row| {
             resut.push(repository::Task {
                 id: row.get(0)?,
@@ -89,7 +111,8 @@ impl repository::Repository for SQLliteRepository {
     }
     fn finished(&self, id: i32) -> Result<bool> {
         let t = time::get_time();
-        match self._update_status(id, TaskStatus::Doing, Some(t)) {
+        debug!("finished {}",id);
+        match self._update_status(id, TaskStatus::Done, Some(t)) {
             Ok(n) => Ok(n > 0),
             Err(e) => Err(e),
         }

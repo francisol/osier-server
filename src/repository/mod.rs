@@ -3,7 +3,7 @@ use time::Timespec;
 use num;
 
 // use num_traits::{FromPrimitive,ToPrimitive};
-#[derive(FromPrimitive,ToPrimitive)]
+#[derive(FromPrimitive,Debug,ToPrimitive)]
 pub enum TaskStatus {
     Wait,
     Doing,
@@ -26,6 +26,7 @@ impl rusqlite::types::FromSql for TaskStatus {
         }
      }
 }
+#[derive(Debug)]
 pub struct Task {
     pub id: i32,
     pub name: String,
@@ -39,6 +40,7 @@ pub struct Task {
 
 pub trait Repository: std::marker::Sync + std::marker::Send {
     fn save(&self, task: &Task) -> Result<bool>;
+    fn clear(&self)->Result<bool>;
     fn get_wait_tasks(&self) -> Result<Vec<Task>>;
     fn get_wait_task(&self) -> Result<Task>;
     fn doing(&self, id: i32) -> Result<bool>;

@@ -8,6 +8,7 @@ pub struct AppConfig {
     pub base_dir: String,
     pub lua_lib: String,
     pub lua_package: String,
+    pub port :i16
 }
 
 unsafe impl std::marker::Sync for AppConfig {}
@@ -56,7 +57,7 @@ fn init_config() -> Arc<AppConfig> {
                 .empty_values(false),
         )
         .get_matches();
-    let core_num: i32 = FromStr::from_str(matches.value_of("core_num").unwrap_or("4")).unwrap_or(4);
+    let core_num: i32 = matches.value_of("core_num").unwrap().parse().unwrap_or(4);
     let base_dir = matches
         .value_of("base_dir")
         .unwrap_or(&def_base_dir)
@@ -79,11 +80,13 @@ fn init_config() -> Arc<AppConfig> {
         .to_string();
     let _ = std::fs::create_dir_all(&lua_lib);
     let _ = std::fs::create_dir_all(&lua_package);
+    let port = matches.value_of("port").unwrap().parse().unwrap();
     return Arc::new(AppConfig {
         core_num,
         base_dir,
         lua_lib,
         lua_package,
+        port,
     });
 }
 
