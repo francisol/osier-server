@@ -15,6 +15,7 @@ pub struct TaskRunner {
     pub args: Vec<ArgScrpit>,
     pub tmpl: Template,
     pub result_tmpl: Template,
+    pub username:String,
     base_dir: String,
 }
 
@@ -116,7 +117,9 @@ impl TaskRunner {
             let outputs = File::create(&tmp_path).unwrap();
             let errors = outputs.try_clone().unwrap();
             debug!("cmd :{}",cmd);
-            Command::new("sh")
+            Command::new("su")
+            .arg("-")
+            .arg(&self.username)
                 .arg("-c")
                 .current_dir(&self.base_dir)
                 .arg(cmd)
@@ -146,6 +149,7 @@ impl Task {
         name: String,
         base_dir: String,
         core_num: i32,
+        username:String,
         sender: mpsc::Sender<i32>,
     ) -> Result<Task> {
         debug!("{}/task.yaml", base_dir);
@@ -159,6 +163,7 @@ impl Task {
             args:args,
             tmpl,
             result_tmpl,
+            username,
             base_dir:base_dir.to_string(),
         };
         return Ok(Task {

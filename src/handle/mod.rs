@@ -25,6 +25,7 @@ struct CreateCMD {
     pub priority: i32,
     pub base_dir: String,
     pub core_num: i32,
+    pub username:String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -59,6 +60,7 @@ impl CMDHandler for CreateCMD {
             finished_at: None,
             id: 0,
             priority: self.priority,
+            username:self.username.to_string(),
             status: repository::TaskStatus::Wait,
         };
         let resut = r.save(&task)?;

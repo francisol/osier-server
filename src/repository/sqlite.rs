@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS "tasks" (
 	"base_dir"	TEXT,
 	"status"	INTEGER,
 	"created_at"	TEXT,
-	"finished_at"	TEXT,
+    "finished_at"	TEXT,
+    "username" TEXT,
 	"msg"	TEXT
 )"#;
 
@@ -51,8 +52,8 @@ impl repository::Repository for SQLliteRepository {
     fn save(&self, task: &repository::Task) -> Result<bool> {
         let conn = &self.conn.lock().unwrap();
         return  match conn.execute(
-             "INSERT INTO tasks (task_name, priority,base_dir,status,core_num,created_at,finished_at) values (?1, ?2,?3,?4,?5,?6,?7)",
-             params![&task.name, task.priority,&task.base_dir,task.status,task.core_num,&task.created_at,&task.finished_at],
+             "INSERT INTO tasks (task_name, priority,base_dir,status,core_num,created_at,finished_at,username) values (?1, ?2,?3,?4,?5,?6,?7,?8)",
+             params![&task.name, task.priority,&task.base_dir,task.status,task.core_num,&task.created_at,&task.finished_at,&task.username],
          ){
              Ok(r)=> Ok(r>0),
              Err(e)=>Err(e),
@@ -68,7 +69,7 @@ impl repository::Repository for SQLliteRepository {
     fn get_wait_task(&self) -> Result<repository::Task> {
         let conn = &self.conn.lock().unwrap();
         debug!("Query");
-        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at FROM tasks where status==0 limit 1")?;
+        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at,username FROM tasks where status==0 limit 1")?;
         let task = stmt.query_row(params![], |row| {
             return Ok(repository::Task {
                 id: row.get(0)?,
@@ -79,6 +80,7 @@ impl repository::Repository for SQLliteRepository {
                 status: row.get(5)?,
                 created_at: row.get(6)?,
                 finished_at: row.get(7)?,
+                username:row.get(8)?,
             });
         });
         return task;
@@ -94,7 +96,7 @@ impl repository::Repository for SQLliteRepository {
     fn get_wait_tasks(&self) -> Result<Vec<repository::Task>> {
         let mut resut = Vec::<repository::Task>::new();
         let conn = &self.conn.lock().unwrap();
-        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at FROM tasks where status==0")?;
+        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at,username FROM tasks where status==0")?;
         let _tasks = stmt.query_map(params![], |row| {
             resut.push(repository::Task {
                 id: row.get(0)?,
@@ -105,6 +107,7 @@ impl repository::Repository for SQLliteRepository {
                 status: row.get(5)?,
                 created_at: row.get(6)?,
                 finished_at: row.get(7)?,
+                username:row.get(8)?,
             });
             return Ok(());
         });

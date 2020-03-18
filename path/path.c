@@ -50,7 +50,6 @@ int path_relative(lua_State *L)
         ++parent;
         ++child;
     }
-    puts(child);
     while (child && *child == '/')
     {
         ++child;

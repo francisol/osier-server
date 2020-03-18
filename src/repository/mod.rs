@@ -37,6 +37,7 @@ pub struct Task {
     pub core_num: i32,
     pub created_at: Timespec,
     pub finished_at: Option<Timespec>,
+    pub username:String,
 }
 
 pub trait Repository: std::marker::Sync + std::marker::Send {

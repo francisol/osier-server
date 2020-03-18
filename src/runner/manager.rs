@@ -78,6 +78,7 @@ impl RunnerManager for DefaultRunnerManager {
                     task.name,
                     task.base_dir,
                     task.core_num,
+                    task.username,
                     sender.clone(),
                 ){
                     Ok(t)=>t,
