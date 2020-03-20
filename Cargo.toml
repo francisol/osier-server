@@ -9,8 +9,7 @@ edition = "2018"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
-rusqlite = "0.21.0"
-time = "0.1"
+rusqlite = {version="0.21.0", features = ["bundled","chrono"]}
 tokio = { version = "0.2", features = ["full"] }
 futures = "0.3.4"
 serde_json = "1.0"
@@ -26,6 +25,7 @@ mustache = "*"
 log = "0.4.8"
 env_logger = "0.7.1"
 simple-logging = "2.0.2"
+chrono = { version = "0.4", features = ["serde"] }
 [build-dependencies]
 cc = "1.0"
 glob = "0.3.0"

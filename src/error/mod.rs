@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize, Serializer,Deserializer};
 use serde_json;
 
 #[derive(Debug)]
-#[allow(clippy::enum_variant_names)]
 pub enum Error {
     IO(std::io::Error),
     Yaml(serde_yaml::Error),
@@ -11,6 +10,7 @@ pub enum Error {
     JSON(serde_json::Error),
     Normal(String),
     Utf8Error(std::str::Utf8Error),
+    Mustache(mustache::Error),
     OK,
 }
 impl Serialize for Error {
@@ -18,12 +18,28 @@ impl Serialize for Error {
     where
         S: Serializer,
     {
-        let data = format!("{:?}", self);
+        let data = format!("{}", self);
         return serializer.serialize_str(&data);
     }
 }
 
-
+impl std::fmt::Display for Error{
+    
+fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> { 
+    match self {
+        Error::OK=>write!(f,"No error"),
+        Error::JSON(e)=>write!(f,"{}",e),
+        Error::IO(e)=>write!(f,"{}",e),
+        Error::Yaml(e)=>write!(f,"{}",e),
+        Error::Lua(e)=>write!(f,"{}",e),
+        Error::SQLite(e)=>write!(f,"{}",e),
+        Error::Normal(e)=>write!(f,"{}",e),
+        Error::Utf8Error(e)=>write!(f,"{}",e),
+        Error::Mustache(e)=>write!(f,"mustache {}",e),
+    };
+    Ok(())
+ }
+}
 
 impl<'de> Deserialize<'de> for Error {
   
@@ -60,5 +76,11 @@ impl std::convert::From<serde_json::Error> for Error {
 impl std::convert::From<rusqlite::Error> for Error {
     fn from(err: rusqlite::Error) -> Self {
         Error::SQLite(err)
+    }
+}
+
+impl std::convert::From<mustache::Error> for Error {
+    fn from(err: mustache::Error) -> Self {
+        Error::Mustache(err)
     }
 }

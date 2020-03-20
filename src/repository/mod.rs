@@ -1,9 +1,10 @@
 use rusqlite::Result;
-use time::Timespec;
 use num;
-
+use serde::{Serialize,Deserialize};
+ use chrono::{DateTime,Local};
 // use num_traits::{FromPrimitive,ToPrimitive};
-#[derive(FromPrimitive,Debug,ToPrimitive)]
+#[derive(FromPrimitive,Debug,ToPrimitive,Serialize, Deserialize)]
+#[allow(clippy::enum_variant_names)]
 pub enum TaskStatus {
     Wait,
     Doing,
@@ -27,7 +28,7 @@ impl rusqlite::types::FromSql for TaskStatus {
         }
      }
 }
-#[derive(Debug)]
+#[derive(Debug,Serialize, Deserialize)]
 pub struct Task {
     pub id: i32,
     pub name: String,
@@ -35,10 +36,12 @@ pub struct Task {
     pub base_dir: String,
     pub status: TaskStatus,
     pub core_num: i32,
-    pub created_at: Timespec,
-    pub finished_at: Option<Timespec>,
+    pub created_at: DateTime<Local>,
+    pub finished_at: Option<DateTime<Local>>,
     pub username:String,
+    pub msg:Option<String>,
 }
+
 
 pub trait Repository: std::marker::Sync + std::marker::Send {
     fn save(&self, task: &Task) -> Result<bool>;
@@ -48,6 +51,11 @@ pub trait Repository: std::marker::Sync + std::marker::Send {
     fn get_wait_task(&self) -> Result<Task>;
     fn doing(&self, id: i32) -> Result<bool>;
     fn finished(&self, id: i32) -> Result<bool>;
+    fn delete(&self, name: &String) -> Result<bool>;
+    fn reset(&self, name: &String) -> Result<bool>;
+    fn query(&self, name: &String) -> Result<Task>;
+    fn list(&self, form: i32,to:i32) -> Result<Vec<Task>>;
+    fn list_by_status(&self, form: i32,to:i32,status:&TaskStatus) -> Result<Vec<Task>>;
 }
 
 pub mod sqlite;

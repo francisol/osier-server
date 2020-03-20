@@ -22,13 +22,12 @@ pub struct ArgScrpit {
 impl Drop for ArgScrpit {
     fn drop(&mut self) {
         unsafe {
+            println!("ok");
             lua_close(*self.state.lock().unwrap());
         }
     }
 }
-extern {
-    fn puts(s :* const c_char);
-}
+
 unsafe impl std::marker::Send for ArgScrpit {}
 unsafe impl std::marker::Sync for ArgScrpit {}
 impl ArgScrpit {

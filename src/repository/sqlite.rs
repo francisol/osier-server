@@ -2,7 +2,7 @@ use crate::repository;
 use crate::repository::TaskStatus;
 use rusqlite::{params, Connection, Result};
 use std::sync::{Arc, Mutex};
-use time::Timespec;
+use chrono::{DateTime,Local};
 pub struct SQLliteRepository {
     conn: Mutex<rusqlite::Connection>,
 }
@@ -39,7 +39,7 @@ impl SQLliteRepository {
         &self,
         id: i32,
         status: TaskStatus,
-        finished_at: Option<Timespec>,
+        finished_at: Option<DateTime<Local>>,
     ) -> Result<usize> {
         let conn = &self.conn.lock().unwrap();
         conn.execute(
@@ -69,7 +69,8 @@ impl repository::Repository for SQLliteRepository {
     fn get_wait_task(&self) -> Result<repository::Task> {
         let conn = &self.conn.lock().unwrap();
         debug!("Query");
-        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at,username FROM tasks where status==0 limit 1")?;
+        let mut stmt = conn.prepare(
+            "SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at,username,msg FROM tasks where status==0 limit 1")?;
         let task = stmt.query_row(params![], |row| {
             return Ok(repository::Task {
                 id: row.get(0)?,
@@ -81,13 +82,14 @@ impl repository::Repository for SQLliteRepository {
                 created_at: row.get(6)?,
                 finished_at: row.get(7)?,
                 username:row.get(8)?,
+                msg:row.get(9)?
             });
         });
         return task;
     }
     fn do_error(&self,id:i32,msg:&String)->Result<usize>{
         let conn = &self.conn.lock().unwrap();
-        let t =time::get_time();
+        let t =chrono::Local::now();
         conn.execute(
             "UPDATE tasks set status = ?1,finished_at=?2,msg=?3 where id= ?4",
             params![TaskStatus::Error, t,msg, id],
@@ -96,9 +98,9 @@ impl repository::Repository for SQLliteRepository {
     fn get_wait_tasks(&self) -> Result<Vec<repository::Task>> {
         let mut resut = Vec::<repository::Task>::new();
         let conn = &self.conn.lock().unwrap();
-        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at,username FROM tasks where status==0")?;
+        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at,username,msg FROM tasks where status==0")?;
         let _tasks = stmt.query_map(params![], |row| {
-            resut.push(repository::Task {
+            Ok(repository::Task {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 priority: row.get(2)?,
@@ -108,9 +110,12 @@ impl repository::Repository for SQLliteRepository {
                 created_at: row.get(6)?,
                 finished_at: row.get(7)?,
                 username:row.get(8)?,
-            });
-            return Ok(());
-        });
+                msg:row.get(9)?
+            })
+        })?;
+        for task in _tasks {
+            resut.push(task?);
+        }
         return Ok(resut);
     }
     fn doing(&self, id: i32) -> Result<bool> {
@@ -120,11 +125,95 @@ impl repository::Repository for SQLliteRepository {
         }
     }
     fn finished(&self, id: i32) -> Result<bool> {
-        let t = time::get_time();
+        let t = chrono::Local::now();
         debug!("finished {}",id);
         match self._update_status(id, TaskStatus::Done, Some(t)) {
             Ok(n) => Ok(n > 0),
             Err(e) => Err(e),
         }
+    }
+
+    fn list(&self, form: i32,to:i32) ->Result<Vec<repository::Task>>{
+        let conn = &self.conn.lock().unwrap();
+        let mut resut = Vec::<repository::Task>::new();
+        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at,username,msg FROM tasks limit ?1,?2")?;
+        let _tasks = stmt.query_map(params![form,to], |row| {
+            Ok(repository::Task {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                priority: row.get(2)?,
+                core_num: row.get(3)?,
+                base_dir: row.get(4)?,
+                status: row.get(5)?,
+                created_at: row.get(6)?,
+                finished_at: row.get(7)?,
+                username:row.get(8)?,
+                msg:row.get(9)?
+            })
+        })?;
+        for task in _tasks {
+            resut.push(task?);
+        }
+        Ok(resut)
+    }
+    fn list_by_status(&self, form: i32,to:i32,status:&TaskStatus) -> Result<Vec<repository::Task>>{
+        let conn = &self.conn.lock().unwrap();
+        let mut resut = Vec::<repository::Task>::new();
+        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at,username,msg FROM tasks where status=?3 limit ?1,?2")?;
+        let _tasks = stmt.query_map(params![form,to,status], |row| {
+            Ok(repository::Task {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                priority: row.get(2)?,
+                core_num: row.get(3)?,
+                base_dir: row.get(4)?,
+                status: row.get(5)?,
+                created_at: row.get(6)?,
+                finished_at: row.get(7)?,
+                username:row.get(8)?,
+                msg:row.get(9)?
+            })
+        })?;
+        for task in _tasks {
+            resut.push(task?);
+        }
+        Ok(resut)
+    }
+
+    fn delete(&self, name: &String) -> Result<bool>{
+        let conn = &self.conn.lock().unwrap();
+        let resut= conn.execute(
+            "DELETE from tasks where task_name = ?1", 
+            params![name]
+        ).map(| s |s==1 )?;
+        Ok(resut)
+    }
+    fn query(&self, name: &String) -> Result<repository::Task>{
+        let conn = &self.conn.lock().unwrap();
+        debug!("Query");
+        let mut stmt = conn.prepare("SELECT id, task_name, priority, core_num,base_dir,status,created_at,finished_at,username,msg FROM tasks where task_name=?1 limit 1")?;
+        let task = stmt.query_row(params![name], |row| {
+            return Ok(repository::Task {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                priority: row.get(2)?,
+                core_num: row.get(3)?,
+                base_dir: row.get(4)?,
+                status: row.get(5)?,
+                created_at: row.get(6)?,
+                finished_at: row.get(7)?,
+                username:row.get(8)?,
+                msg:row.get(9)?
+            });
+        });
+        return task;
+    }
+    fn reset(&self, name: &String) -> Result<bool>{
+        let conn = &self.conn.lock().unwrap();
+        let resut= conn.execute(
+            "UPDATE tasks set status =?1,msg='' where task_name = ?2", 
+            params![TaskStatus::Wait,name]
+        ).map(| s |s==1 )?;
+        Ok(resut)
     }
 }

@@ -19,8 +19,8 @@ lazy_static! {
 
 fn init_config() -> Arc<AppConfig> {
     let mut def_base_dir: String = format!("{}", env::current_dir().unwrap().display());
-    if cfg!(lunix) {
-        def_base_dir = String::from_str("/var/lab_tool").unwrap();
+    if cfg!(unix) {
+        def_base_dir = String::from_str("/var/osier").unwrap();
     }
     let matches = App::new("osier-server")
         .version("dev-1")
@@ -62,24 +62,33 @@ fn init_config() -> Arc<AppConfig> {
         .value_of("base_dir")
         .unwrap_or(&def_base_dir)
         .to_string();
-    let mut def_base_dir_path = std::path::PathBuf::from_str(&def_base_dir).unwrap();
-
-    let _ = std::fs::create_dir_all(&def_base_dir_path);
-    def_base_dir_path.push("lua_lib");
-    let mut def_lua_package_path = std::path::PathBuf::from_str(&def_base_dir).unwrap();
+    let mut base_dir_path = std::env::current_dir().unwrap();
+    base_dir_path.push(base_dir);
+    let _ = std::fs::create_dir_all(&base_dir_path).unwrap();
+    let mut def_lua_lib_path = std::path::PathBuf::from(&base_dir_path);
+    def_lua_lib_path.push("lua_lib");
+    let mut def_lua_package_path = std::path::PathBuf::from(&base_dir_path);
     def_lua_package_path.push("lua_package");
-    let def_lua_lib = format!("{}", def_base_dir_path.display());
-    let def_lua_package = format!("{}", def_lua_package_path.display());
-    let lua_lib = matches
+    let lua_lib_path = matches
         .value_of("lua_lib")
-        .unwrap_or(&def_lua_lib)
-        .to_string();
-    let lua_package = matches
+        .map( |p| {
+            let mut path= env::current_dir().unwrap();
+            path.push(p);
+           return path;}
+         )
+        .unwrap_or(def_lua_lib_path);
+    let lua_package_path = matches
         .value_of("lua_package")
-        .unwrap_or(&def_lua_package)
-        .to_string();
-    let _ = std::fs::create_dir_all(&lua_lib);
-    let _ = std::fs::create_dir_all(&lua_package);
+        .map(|p| {
+            let mut path= env::current_dir().unwrap();
+            path.push(p);
+           return path;}).unwrap_or(def_lua_package_path);
+
+    let lua_lib=format!("{}",lua_lib_path.display());
+    let base_dir=format!("{}",base_dir_path.display());
+    let lua_package=format!("{}",lua_package_path.display());
+    let _ = std::fs::create_dir_all(&lua_lib_path).unwrap();
+    let _ = std::fs::create_dir_all(&lua_package_path).unwrap();
     let port = matches.value_of("port").unwrap().parse().unwrap();
     return Arc::new(AppConfig {
         core_num,

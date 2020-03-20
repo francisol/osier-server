@@ -66,6 +66,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 
 [[package]]
+name = "chrono"
+version = "0.4.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "80094f509cf8b5ae86a4966a39b3ff66cd7e2a3e594accec3743ff3fabeab5b2"
+dependencies = [
+ "num-integer",
+ "num-traits",
+ "serde",
+ "time",
+]
+
+[[package]]
 name = "clap"
 version = "2.33.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -291,6 +303,7 @@ version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "266eb8c361198e8d1f682bc974e5d9e2ae90049fb1943890904d11dad7d4a77d"
 dependencies = [
+ "cc",
  "pkg-config",
  "vcpkg",
 ]
@@ -522,6 +535,7 @@ name = "osier-server"
 version = "0.1.0"
 dependencies = [
  "cc",
+ "chrono",
  "clap",
  "env_logger",
  "futures",
@@ -539,7 +553,6 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "simple-logging",
- "time",
  "tokio",
 ]
 
@@ -633,6 +646,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "64a656821bb6317a84b257737b7934f79c0dbb7eb694710475908280ebad3e64"
 dependencies = [
  "bitflags",
+ "chrono",
  "fallible-iterator",
  "fallible-streaming-iterator",
  "libsqlite3-sys",

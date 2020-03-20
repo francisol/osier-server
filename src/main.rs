@@ -23,14 +23,24 @@ extern crate simple_logging;
 
 
 fn main() {
-    std::panic::set_hook(Box::new(|panic_info|{
-        error!("panic info: {:?}",panic_info);
-    }));
+    // std::panic::set_hook(Box::new(|panic_info|{
+    //     let msg = match panic_info.payload().downcast_ref::<&'static str>() { 
+    //         Some(s) => *s, 
+    //         None => match panic_info.payload().downcast_ref::<String>() { 
+    //             Some(s) => &s[..], 
+    //             None => "Box<Any>", 
+    //         } 
+    //     }; 
+    //         println!("Exit by {}",msg);
+
+    //     // print!("panic info: {:?}",panic_info.message.);
+    // }));
     let c = config::get_config();
-    if cfg!(build = "debug"){
+    if cfg!(debug_assertions) {
         env_logger::init();
-    }
-    if cfg!(build = "release"){
+        println!("Debugging enabled");
+    } else {
+        println!("Debugging disabled");
         simple_logging::log_to_file(format!("{}/info.log",&c.base_dir), log::LevelFilter::Info).unwrap();
     }
     std::env::set_current_dir(&c.base_dir).expect("set_current_dir fail");
