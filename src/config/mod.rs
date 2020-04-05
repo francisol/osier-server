@@ -28,7 +28,7 @@ fn init_config() -> Arc<AppConfig> {
         .author("Xie Zhongtao")
         .arg(
             Arg::with_name("core_num")
-                .default_value("4")
+                .default_value("128")
                 .long("core_num")
                 .help("the max thread size of task"),
         )
