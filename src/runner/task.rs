@@ -21,16 +21,6 @@ pub struct TaskRunner {
     pub username: String,
     base_dir: String,
 }
-pub struct Warp {
-    pub child :Child
-}
-
-impl  Drop for Warp{
-
-fn drop(&mut self) { 
-    self.child.kill();
-}
-}
 
 fn get_arg_scrpit(info: &TaskInfo, base_dir: &String) -> Result<Vec<ArgScrpit>> {
     let mut args = Vec::new();
@@ -117,8 +107,8 @@ impl TaskRunner {
     }
 
     #[cfg(target_os = "windows")]
-    fn run_commd<P: AsRef<str>>(&self, command: P, output: &PathBuf) -> Result<()> {
-        let _ = std::fs::create_dir_all(&output.parent());
+    fn run_commd<P: AsRef<str>>(&self, command: P, output: &std::path::PathBuf) -> Result<()> {
+        let _ = std::fs::create_dir_all(&output.parent().unwrap());
         let temp = format!("{}.temp", output.display());
         let outputs = File::create(&temp)?;
         let errors = outputs.try_clone()?;
@@ -129,8 +119,10 @@ impl TaskRunner {
             .stderr(Stdio::from(errors))
             .spawn()?
             .wait_with_output()?;
-        std::fs::rename(temp, output);
+        std::fs::rename(temp, output)?;
+        Ok(())
     }
+    #[cfg(not(target_os = "windows"))]
     fn run_unix_commd(&self, command: &[u8]) -> Result<()> {
         let mut child: std::process::Child = Command::new("su")
             .arg("-")
@@ -145,7 +137,6 @@ impl TaskRunner {
     }
     #[cfg(not(target_os = "windows"))]
     fn run_commd<P: AsRef<str>>(&self, command: P, output: &std::path::PathBuf) -> Result<()> {
-        // let _ = std::fs::create_dir_all(&output.parent());
         let cmd: String = format!(
             "cd {dir}\n mkdir -p {parent} \n{cmd} > {out}.temp 2>&1 \n  mv {out}.temp {out}",
             dir = &self.base_dir,
